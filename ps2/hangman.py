@@ -60,8 +60,11 @@ def is_word_guessed(secret_word, letters_guessed):
     returns: boolean, True if all the letters of secret_word are in letters_guessed;
       False otherwise
     '''
-    # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    for i in secret_word:
+        if i not in letters_guessed:
+            return False
+    return True
+
 
 
 
@@ -72,8 +75,13 @@ def get_guessed_word(secret_word, letters_guessed):
     returns: string, comprised of letters, underscores (_), and spaces that represents
       which letters in secret_word have been guessed so far.
     '''
-    # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    guessed_word = ''
+    for i in secret_word:
+        if i in letters_guessed:
+            guessed_word = guessed_word + i
+        else:
+            guessed_word = guessed_word + '_ '
+    return guessed_word
 
 
 
@@ -83,8 +91,10 @@ def get_available_letters(letters_guessed):
     returns: string (of letters), comprised of letters that represents which letters have not
       yet been guessed.
     '''
-    # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    low_case = string.ascii_lowercase
+    for i in letters_guessed:
+        low_case = low_case.replace(i,'')
+    return low_case
     
     
 
@@ -113,9 +123,45 @@ def hangman(secret_word):
     
     Follows the other limitations detailed in the problem write-up.
     '''
-    # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
 
+    print("Welcome to the game Hangman!")
+    print("I am thinking of a word that is " + str(len(secret_word)) + " letters long.")
+    letters_guessed = []
+    warnings_num = 3
+    guesses = len(secret_word) + 2
+
+    while guesses > 0:
+        print("--------------")
+        print("You have " + str(guesses) + " guesses left.")
+        print("Available letters: " + get_available_letters(letters_guessed))
+        str1 = input("Please guess a letter: ")
+        str1 = str1.lower()
+        if not str1.isalpha():
+            guesses -= 1
+            warnings_num -= 1
+            print("Oops! That is not a valid letter. You have " + str(warnings_num) + " warnings left: " + get_guessed_word(secret_word, letters_guessed))
+        elif str1 in letters_guessed:
+            warnings_num -= 1
+            if warnings_num < 0:
+                print("Oops! You've already guessed that letter. You have no warnings left so you lose one guess: " + get_guessed_word(secret_word, letters_guessed))
+                guesses -= 1
+            else:
+                print("Oops! You have already guessed that letter. You now have " + str(warnings_num) + " warnings: " + get_guessed_word(secret_word, letters_guessed))
+        else:
+            letters_guessed.append(str1)
+            if str1 in secret_word:
+                print("Good guess: " + get_guessed_word(secret_word, letters_guessed))
+            else:
+                guesses -= 2 if str1 in ['a', 'e', 'i', 'o', 'u'] else 1
+                print("Oops! That letter is not in my word: " + get_guessed_word(secret_word, letters_guessed))
+        if is_word_guessed(secret_word, letters_guessed):
+            print("Congratulations, you won!")
+            print("Your total score for this game is : " + str(guesses+len(set(secret_word))))
+            break
+
+
+    if not get_guessed_word(secret_word, letters_guessed).isalpha():
+        print("Sorry, you ran out of guesses. The word was " + secret_word + '.')
 
 
 # When you've completed your hangman function, scroll down to the bottom
@@ -126,8 +172,6 @@ def hangman(secret_word):
 
 # -----------------------------------
 
-
-
 def match_with_gaps(my_word, other_word):
     '''
     my_word: string with _ characters, current guess of secret word
@@ -137,9 +181,23 @@ def match_with_gaps(my_word, other_word):
         _ , and my_word and other_word are of the same length;
         False otherwise: 
     '''
-    # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
-
+    my_word = my_word.replace(" ", '')
+    if len(my_word) == 0:
+        return True
+    if len(my_word) != len(other_word):
+        return False
+    i = 0
+    while i < len(my_word):
+        if my_word[i] == other_word[i]:
+            i += 1
+        elif my_word[i] == '_':
+            if other_word[i] in my_word:
+                return False
+            else:
+                i += 1
+        else:
+            return False
+    return True
 
 
 def show_possible_matches(my_word):
@@ -153,8 +211,14 @@ def show_possible_matches(my_word):
 
     '''
     # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
-
+    matches = ""
+    for i in wordlist:
+        if match_with_gaps(my_word, i):
+            matches += ' ' + i
+    if len(matches) == 0:
+        print("No matches found.")
+    else:
+        print(matches)
 
 
 def hangman_with_hints(secret_word):
@@ -185,7 +249,47 @@ def hangman_with_hints(secret_word):
     Follows the other limitations detailed in the problem write-up.
     '''
     # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    print("Welcome to the game Hangman!")
+    print("I am thinking of a word that is " + str(len(secret_word)) + " letters long.")
+    letters_guessed = []
+    warnings_num = 3
+    guesses = len(secret_word) + 2
+
+    while guesses > 0:
+        print("--------------")
+        print("You have " + str(guesses) + " guesses left.")
+        print("Available letters: " + get_available_letters(letters_guessed))
+        str1 = input("Please guess a letter: ")
+        str1 = str1.lower()
+        if str1 == '*':
+            print("Possible word matches are: ")
+            show_possible_matches(get_guessed_word(secret_word, letters_guessed))
+        elif not str1.isalpha():
+            guesses -= 1
+            warnings_num -= 1
+            print("Oops! That is not a valid letter. You have " + str(warnings_num) + " warnings left: " + get_guessed_word(secret_word, letters_guessed))
+        elif str1 in letters_guessed:
+            warnings_num -= 1
+            if warnings_num < 0:
+                print("Oops! You've already guessed that letter. You have no warnings left so you lose one guess: " + get_guessed_word(secret_word, letters_guessed))
+                guesses -= 1
+            else:
+                print("Oops! You have already guessed that letter. You now have " + str(warnings_num) + " warnings: " + get_guessed_word(secret_word, letters_guessed))
+        else:
+            letters_guessed.append(str1)
+            if str1 in secret_word:
+                print("Good guess: " + get_guessed_word(secret_word, letters_guessed))
+            else:
+                guesses -= 2 if str1 in ['a', 'e', 'i', 'o', 'u'] else 1
+                print("Oops! That letter is not in my word: " + get_guessed_word(secret_word, letters_guessed))
+        if is_word_guessed(secret_word, letters_guessed):
+            print("Congratulations, you won!")
+            print("Your total score for this game is : " + str(guesses+len(set(secret_word))))
+            break
+
+
+    if not get_guessed_word(secret_word, letters_guessed).isalpha():
+        print("Sorry, you ran out of guesses. The word was " + secret_word + '.')
 
 
 
@@ -201,13 +305,13 @@ if __name__ == "__main__":
     # To test part 2, comment out the pass line above and
     # uncomment the following two lines.
     
-    secret_word = choose_word(wordlist)
-    hangman(secret_word)
+    # secret_word = choose_word(wordlist)
+    # hangman(secret_word)
 
 ###############
     
     # To test part 3 re-comment out the above lines and 
     # uncomment the following two lines. 
     
-    #secret_word = choose_word(wordlist)
-    #hangman_with_hints(secret_word)
+    secret_word = choose_word(wordlist)
+    hangman_with_hints(secret_word)
